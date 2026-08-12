@@ -18,6 +18,8 @@ WatchFace({
     const time = hmSensor.createSensor(hmSensor.id.TIME)
     const step = hmSensor.createSensor(hmSensor.id.STEP)
     const heart = hmSensor.createSensor(hmSensor.id.HEART)
+    const calorie = hmSensor.createSensor(hmSensor.id.CALORIE)
+    const battery = hmSensor.createSensor(hmSensor.id.BATTERY)
 
 
     // ========================================
@@ -35,6 +37,24 @@ WatchFace({
       '7.png',
       '8.png',
       '9.png',
+    ]
+
+
+    // ========================================
+    // 小さい数字
+    // ========================================
+
+    const smallDigits = [
+      'date_0.png',
+      'date_1.png',
+      'date_2.png',
+      'date_3.png',
+      'date_4.png',
+      'date_5.png',
+      'date_6.png',
+      'date_7.png',
+      'date_8.png',
+      'date_9.png',
     ]
 
 
@@ -63,25 +83,8 @@ WatchFace({
 
 
     // ========================================
-    // 日付用数字
+    // 日付 MM.DD
     // ========================================
-
-    const dateDigits = [
-      'date_0.png',
-      'date_1.png',
-      'date_2.png',
-      'date_3.png',
-      'date_4.png',
-      'date_5.png',
-      'date_6.png',
-      'date_7.png',
-      'date_8.png',
-      'date_9.png',
-    ]
-
-    // MM.DD
-    // 全体幅 約144px
-    // 画面中央に配置
 
     const dateY = 278
 
@@ -118,11 +121,7 @@ WatchFace({
     ]
 
 
-    // ========================================
-    // 日付画像更新
-    // ========================================
-
-    const updateDate = () => {
+    function updateDate() {
       const month =
         time.month < 10
           ? '0' + time.month
@@ -134,19 +133,19 @@ WatchFace({
           : String(time.day)
 
       dateWidgets[0].setProperty(hmUI.prop.MORE, {
-        src: dateDigits[Number(month[0])],
+        src: smallDigits[Number(month[0])],
       })
 
       dateWidgets[1].setProperty(hmUI.prop.MORE, {
-        src: dateDigits[Number(month[1])],
+        src: smallDigits[Number(month[1])],
       })
 
       dateWidgets[3].setProperty(hmUI.prop.MORE, {
-        src: dateDigits[Number(day[0])],
+        src: smallDigits[Number(day[0])],
       })
 
       dateWidgets[4].setProperty(hmUI.prop.MORE, {
-        src: dateDigits[Number(day[1])],
+        src: smallDigits[Number(day[1])],
       })
     }
 
@@ -154,71 +153,359 @@ WatchFace({
 
 
     // ========================================
-    // 歩数
+    // 詳細画面の行位置
     // ========================================
 
-    const stepText = hmUI.createWidget(hmUI.widget.TEXT, {
-      x: 20,
-      y: 335,
-      w: 350,
-      h: 35,
+    const stepY = 290
+    const heartY = 330
+    const calorieY = 370
+    const batteryY = 410
+
+
+    // ========================================
+    // ラベル
+    // ========================================
+
+    function createLabel(text, y) {
+      return hmUI.createWidget(hmUI.widget.TEXT, {
+        x: 20,
+        y: y,
+        w: 90,
+        h: 36,
+
+        color: 0xffffff,
+        text_size: 17,
+
+        align_h: hmUI.align.CENTER_H,
+        align_v: hmUI.align.CENTER_V,
+        text_style: hmUI.text_style.NONE,
+
+        text: text,
+      })
+    }
+
+
+    const stepLabel = createLabel('STEP', stepY)
+    const heartLabel = createLabel('BPM', heartY)
+    const calorieLabel = createLabel('CAL', calorieY)
+    const batteryLabel = createLabel('BAT%', batteryY)
+
+    const detailLabels = [
+      stepLabel,
+      heartLabel,
+      calorieLabel,
+      batteryLabel,
+    ]
+
+
+    // ========================================
+    // 数字ウィジェット作成
+    // ========================================
+
+    function createDigitWidgets(count, y) {
+      const widgets = []
+
+      for (let i = 0; i < count; i++) {
+        widgets.push(
+          hmUI.createWidget(hmUI.widget.IMG, {
+            x: 0,
+            y: y,
+            src: 'date_0.png',
+          })
+        )
+      }
+
+      return widgets
+    }
+
+
+    const stepDigitWidgets =
+      createDigitWidgets(6, stepY)
+
+    const heartDigitWidgets =
+      createDigitWidgets(3, heartY)
+
+    const calorieDigitWidgets =
+      createDigitWidgets(5, calorieY)
+
+    const batteryDigitWidgets =
+      createDigitWidgets(3, batteryY)
+
+
+    // ========================================
+    // 心拍未取得表示
+    // ========================================
+
+    const heartNoData = hmUI.createWidget(hmUI.widget.TEXT, {
+      x: 120,
+      y: heartY,
+      w: 240,
+      h: 36,
 
       color: 0xffffff,
-      text_size: 22,
+      text_size: 20,
 
       align_h: hmUI.align.CENTER_H,
       align_v: hmUI.align.CENTER_V,
       text_style: hmUI.text_style.NONE,
 
-      text: `STEP ${step.current}`,
+      text: '--',
     })
 
 
     // ========================================
-    // 心拍
+    // 詳細画面のタップ領域
     // ========================================
 
-    const heartText = hmUI.createWidget(hmUI.widget.TEXT, {
-      x: 20,
-      y: 385,
-      w: 350,
-      h: 35,
-
-      color: 0xffffff,
-      text_size: 22,
-
-      align_h: hmUI.align.CENTER_H,
-      align_v: hmUI.align.CENTER_V,
-      text_style: hmUI.text_style.NONE,
-
-      text:
-        heart.last > 0
-          ? `BPM ${heart.last}`
-          : 'BPM --',
-    })
-
-
-    // ========================================
-    // 詳細画面は最初は非表示
-    // ========================================
-
-    stepText.setProperty(
-      hmUI.prop.VISIBLE,
-      false
+    const stepClick = hmUI.createWidget(
+      hmUI.widget.IMG_CLICK,
+      {
+        x: 15,
+        y: stepY,
+        w: 360,
+        h: 36,
+        src: 'tap_transparent.png',
+        type: hmUI.data_type.STEP,
+      }
     )
 
-    heartText.setProperty(
-      hmUI.prop.VISIBLE,
-      false
+    const heartClick = hmUI.createWidget(
+      hmUI.widget.IMG_CLICK,
+      {
+        x: 15,
+        y: heartY,
+        w: 360,
+        h: 36,
+        src: 'tap_transparent.png',
+        type: hmUI.data_type.HEART,
+      }
     )
 
+    const calorieClick = hmUI.createWidget(
+      hmUI.widget.IMG_CLICK,
+      {
+        x: 15,
+        y: calorieY,
+        w: 360,
+        h: 36,
+        src: 'tap_transparent.png',
+        type: hmUI.data_type.CAL,
+      }
+    )
+
+    const batteryClick = hmUI.createWidget(
+      hmUI.widget.IMG_CLICK,
+      {
+        x: 15,
+        y: batteryY,
+        w: 360,
+        h: 36,
+        src: 'tap_transparent.png',
+        type: hmUI.data_type.BATTERY,
+      }
+    )
+
+    const detailClicks = [
+      stepClick,
+      heartClick,
+      calorieClick,
+      batteryClick,
+    ]
+
 
     // ========================================
-    // 日付をまとめて表示 / 非表示
+    // 状態
     // ========================================
 
-    const setDateVisible = (visible) => {
-      for (let i = 0; i < dateWidgets.length; i++) {
+    let detailVisible = false
+
+
+    // ========================================
+    // 数字列描画
+    // ========================================
+
+    function updateDigitRow(
+      widgets,
+      value,
+      maxDigits,
+      y,
+      visible
+    ) {
+      for (let i = 0; i < widgets.length; i++) {
+        widgets[i].setProperty(
+          hmUI.prop.VISIBLE,
+          false
+        )
+      }
+
+      if (!visible) {
+        return
+      }
+
+      let number = Math.round(Number(value))
+
+      if (!Number.isFinite(number) || number < 0) {
+        number = 0
+      }
+
+      const text = String(number)
+
+      const digitWidth = 28
+      const gap = 2
+
+      const valueAreaX = 115
+      const valueAreaW = 255
+
+      const visibleCount =
+        Math.min(text.length, maxDigits)
+
+      const totalWidth =
+        visibleCount * digitWidth +
+        (visibleCount - 1) * gap
+
+      const startX =
+        valueAreaX +
+        Math.floor(
+          (valueAreaW - totalWidth) / 2
+        )
+
+      for (let i = 0; i < visibleCount; i++) {
+        const sourceIndex =
+          text.length - visibleCount + i
+
+        const digit =
+          Number(text[sourceIndex])
+
+        widgets[i].setProperty(
+          hmUI.prop.MORE,
+          {
+            x: startX + i * (digitWidth + gap),
+            y: y,
+            src: smallDigits[digit],
+          }
+        )
+
+        widgets[i].setProperty(
+          hmUI.prop.VISIBLE,
+          true
+        )
+      }
+    }
+
+
+    // ========================================
+    // 歩数更新
+    // ========================================
+
+    function updateStep() {
+      updateDigitRow(
+        stepDigitWidgets,
+        step.current,
+        6,
+        stepY,
+        detailVisible
+      )
+    }
+
+
+    // ========================================
+    // 心拍更新
+    // ========================================
+
+    function updateHeart() {
+      if (!detailVisible) {
+        for (
+          let i = 0;
+          i < heartDigitWidgets.length;
+          i++
+        ) {
+          heartDigitWidgets[i].setProperty(
+            hmUI.prop.VISIBLE,
+            false
+          )
+        }
+
+        heartNoData.setProperty(
+          hmUI.prop.VISIBLE,
+          false
+        )
+
+        return
+      }
+
+      if (heart.last > 0) {
+        heartNoData.setProperty(
+          hmUI.prop.VISIBLE,
+          false
+        )
+
+        updateDigitRow(
+          heartDigitWidgets,
+          heart.last,
+          3,
+          heartY,
+          true
+        )
+      } else {
+        for (
+          let i = 0;
+          i < heartDigitWidgets.length;
+          i++
+        ) {
+          heartDigitWidgets[i].setProperty(
+            hmUI.prop.VISIBLE,
+            false
+          )
+        }
+
+        heartNoData.setProperty(
+          hmUI.prop.VISIBLE,
+          true
+        )
+      }
+    }
+
+
+    // ========================================
+    // カロリー更新
+    // ========================================
+
+    function updateCalorie() {
+      updateDigitRow(
+        calorieDigitWidgets,
+        calorie.current,
+        5,
+        calorieY,
+        detailVisible
+      )
+    }
+
+
+    // ========================================
+    // バッテリー更新
+    // ========================================
+
+    function updateBattery() {
+      updateDigitRow(
+        batteryDigitWidgets,
+        battery.current,
+        3,
+        batteryY,
+        detailVisible
+      )
+    }
+
+
+    // ========================================
+    // 日付表示 / 非表示
+    // ========================================
+
+    function setDateVisible(visible) {
+      for (
+        let i = 0;
+        i < dateWidgets.length;
+        i++
+      ) {
         dateWidgets[i].setProperty(
           hmUI.prop.VISIBLE,
           visible
@@ -228,13 +515,57 @@ WatchFace({
 
 
     // ========================================
-    // ホーム / 詳細 切り替え
+    // 詳細画面表示 / 非表示
     // ========================================
 
-    let detailVisible = false
+    function setDetailVisible(visible) {
+      detailVisible = visible
+
+      // ラベル
+      for (
+        let i = 0;
+        i < detailLabels.length;
+        i++
+      ) {
+        detailLabels[i].setProperty(
+          hmUI.prop.VISIBLE,
+          visible
+        )
+      }
+
+      // タップ領域
+      // setEnable() は使わない
+      for (
+        let i = 0;
+        i < detailClicks.length;
+        i++
+      ) {
+        detailClicks[i].setProperty(
+          hmUI.prop.VISIBLE,
+          visible
+        )
+      }
+
+      // 数値
+      updateStep()
+      updateHeart()
+      updateCalorie()
+      updateBattery()
+    }
+
+
+    // ========================================
+    // 初期状態
+    // ========================================
+
+    setDetailVisible(false)
+
+
+    // ========================================
+    // ロゴタップ
+    // ========================================
 
     hmUI.createWidget(hmUI.widget.BUTTON, {
-      // ロゴ部分
       x: 110,
       y: 65,
       w: 170,
@@ -246,65 +577,55 @@ WatchFace({
       press_src: 'tap_transparent.png',
 
       click_func: () => {
-        detailVisible = !detailVisible
+        const nextState = !detailVisible
 
         // ホーム画面
         timeWidget.setProperty(
           hmUI.prop.VISIBLE,
-          !detailVisible
+          !nextState
         )
 
         setDateVisible(
-          !detailVisible
+          !nextState
         )
 
         // 詳細画面
-        stepText.setProperty(
-          hmUI.prop.VISIBLE,
-          detailVisible
-        )
-
-        heartText.setProperty(
-          hmUI.prop.VISIBLE,
-          detailVisible
+        setDetailVisible(
+          nextState
         )
       },
     })
 
 
     // ========================================
-    // 歩数更新
+    // センサー更新イベント
     // ========================================
 
     step.addEventListener(
       hmSensor.event.CHANGE,
       () => {
-        stepText.setProperty(
-          hmUI.prop.MORE,
-          {
-            text: `STEP ${step.current}`,
-          }
-        )
+        updateStep()
       }
     )
-
-
-    // ========================================
-    // 心拍更新
-    // ========================================
 
     heart.addEventListener(
       heart.event.LAST,
       () => {
-        heartText.setProperty(
-          hmUI.prop.MORE,
-          {
-            text:
-              heart.last > 0
-                ? `BPM ${heart.last}`
-                : 'BPM --',
-          }
-        )
+        updateHeart()
+      }
+    )
+
+    calorie.addEventListener(
+      hmSensor.event.CHANGE,
+      () => {
+        updateCalorie()
+      }
+    )
+
+    battery.addEventListener(
+      hmSensor.event.CHANGE,
+      () => {
+        updateBattery()
       }
     )
 

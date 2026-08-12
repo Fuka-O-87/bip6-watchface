@@ -42,7 +42,6 @@ WatchFace({
 
     // ========================================
     // 小さい数字
-    // 日付・詳細画面で共用
     // ========================================
 
     const smallDigits = [
@@ -164,7 +163,7 @@ WatchFace({
 
 
     // ========================================
-    // ラベル作成
+    // ラベル
     // ========================================
 
     function createLabel(text, y) {
@@ -220,19 +219,15 @@ WatchFace({
     }
 
 
-    // 歩数：最大6桁
     const stepDigitWidgets =
       createDigitWidgets(6, stepY)
 
-    // 心拍：最大3桁
     const heartDigitWidgets =
       createDigitWidgets(3, heartY)
 
-    // カロリー：最大5桁
     const calorieDigitWidgets =
       createDigitWidgets(5, calorieY)
 
-    // バッテリー：最大3桁
     const batteryDigitWidgets =
       createDigitWidgets(3, batteryY)
 
@@ -259,7 +254,67 @@ WatchFace({
 
 
     // ========================================
-    // 詳細画面状態
+    // 詳細画面のタップ領域
+    // ========================================
+
+    const stepClick = hmUI.createWidget(
+      hmUI.widget.IMG_CLICK,
+      {
+        x: 15,
+        y: stepY,
+        w: 360,
+        h: 36,
+        src: 'tap_transparent.png',
+        type: hmUI.data_type.STEP,
+      }
+    )
+
+    const heartClick = hmUI.createWidget(
+      hmUI.widget.IMG_CLICK,
+      {
+        x: 15,
+        y: heartY,
+        w: 360,
+        h: 36,
+        src: 'tap_transparent.png',
+        type: hmUI.data_type.HEART,
+      }
+    )
+
+    const calorieClick = hmUI.createWidget(
+      hmUI.widget.IMG_CLICK,
+      {
+        x: 15,
+        y: calorieY,
+        w: 360,
+        h: 36,
+        src: 'tap_transparent.png',
+        type: hmUI.data_type.CAL,
+      }
+    )
+
+    const batteryClick = hmUI.createWidget(
+      hmUI.widget.IMG_CLICK,
+      {
+        x: 15,
+        y: batteryY,
+        w: 360,
+        h: 36,
+        src: 'tap_transparent.png',
+        type: hmUI.data_type.BATTERY,
+      }
+    )
+
+    const detailClicks = [
+      stepClick,
+      heartClick,
+      calorieClick,
+      batteryClick,
+    ]
+
+
+    // ========================================
+    // 状態
     // ========================================
 
     let detailVisible = false
@@ -276,7 +331,6 @@ WatchFace({
       y,
       visible
     ) {
-      // いったん全部非表示
       for (let i = 0; i < widgets.length; i++) {
         widgets[i].setProperty(
           hmUI.prop.VISIBLE,
@@ -299,7 +353,6 @@ WatchFace({
       const digitWidth = 28
       const gap = 2
 
-      // 左のラベルを避けた数値領域
       const valueAreaX = 115
       const valueAreaW = 255
 
@@ -462,7 +515,7 @@ WatchFace({
 
 
     // ========================================
-    // 詳細表示 / 非表示
+    // 詳細画面表示 / 非表示
     // ========================================
 
     function setDetailVisible(visible) {
@@ -480,17 +533,24 @@ WatchFace({
         )
       }
 
-      if (visible) {
-        updateStep()
-        updateHeart()
-        updateCalorie()
-        updateBattery()
-      } else {
-        updateStep()
-        updateHeart()
-        updateCalorie()
-        updateBattery()
+      // タップ領域
+      // setEnable() は使わない
+      for (
+        let i = 0;
+        i < detailClicks.length;
+        i++
+      ) {
+        detailClicks[i].setProperty(
+          hmUI.prop.VISIBLE,
+          visible
+        )
       }
+
+      // 数値
+      updateStep()
+      updateHeart()
+      updateCalorie()
+      updateBattery()
     }
 
 
@@ -519,7 +579,7 @@ WatchFace({
       click_func: () => {
         const nextState = !detailVisible
 
-        // ホーム
+        // ホーム画面
         timeWidget.setProperty(
           hmUI.prop.VISIBLE,
           !nextState
@@ -529,7 +589,7 @@ WatchFace({
           !nextState
         )
 
-        // 詳細
+        // 詳細画面
         setDetailVisible(
           nextState
         )

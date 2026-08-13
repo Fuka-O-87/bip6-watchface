@@ -66,7 +66,7 @@ WatchFace({
       hour_zero: 1,
 
       hour_startX: 45,
-      hour_startY: 320,
+      hour_startY: 344,
       hour_array: timeDigits,
       hour_space: 4,
 
@@ -86,7 +86,7 @@ WatchFace({
     // 日付 MM.DD
     // ========================================
 
-    const dateY = 278
+    const dateY = 290
 
     const dateWidgets = [
       hmUI.createWidget(hmUI.widget.IMG, {
@@ -163,32 +163,32 @@ WatchFace({
 
 
     // ========================================
-    // ラベル
+    // ラベル画像
     // ========================================
 
-    function createLabel(text, y) {
-      return hmUI.createWidget(hmUI.widget.TEXT, {
-        x: 20,
-        y: y,
-        w: 90,
-        h: 36,
+    const stepLabel = hmUI.createWidget(hmUI.widget.IMG, {
+      x: 16,
+      y: stepY,
+      src: 'label_step.png',
+    })
 
-        color: 0xffffff,
-        text_size: 17,
+    const heartLabel = hmUI.createWidget(hmUI.widget.IMG, {
+      x: 16,
+      y: heartY,
+      src: 'label_bpm.png',
+    })
 
-        align_h: hmUI.align.CENTER_H,
-        align_v: hmUI.align.CENTER_V,
-        text_style: hmUI.text_style.NONE,
+    const calorieLabel = hmUI.createWidget(hmUI.widget.IMG, {
+      x: 16,
+      y: calorieY,
+      src: 'label_cal.png',
+    })
 
-        text: text,
-      })
-    }
-
-
-    const stepLabel = createLabel('STEP', stepY)
-    const heartLabel = createLabel('BPM', heartY)
-    const calorieLabel = createLabel('CAL', calorieY)
-    const batteryLabel = createLabel('BAT%', batteryY)
+    const batteryLabel = hmUI.createWidget(hmUI.widget.IMG, {
+      x: 16,
+      y: batteryY,
+      src: 'label_bat_percent.png',
+    })
 
     const detailLabels = [
       stepLabel,
@@ -237,9 +237,9 @@ WatchFace({
     // ========================================
 
     const heartNoData = hmUI.createWidget(hmUI.widget.TEXT, {
-      x: 120,
+      x: 165,
       y: heartY,
-      w: 240,
+      w: 205,
       h: 36,
 
       color: 0xffffff,
@@ -260,9 +260,9 @@ WatchFace({
     const stepClick = hmUI.createWidget(
       hmUI.widget.IMG_CLICK,
       {
-        x: 15,
+        x: 10,
         y: stepY,
-        w: 360,
+        w: 370,
         h: 36,
         src: 'tap_transparent.png',
         type: hmUI.data_type.STEP,
@@ -272,9 +272,9 @@ WatchFace({
     const heartClick = hmUI.createWidget(
       hmUI.widget.IMG_CLICK,
       {
-        x: 15,
+        x: 10,
         y: heartY,
-        w: 360,
+        w: 370,
         h: 36,
         src: 'tap_transparent.png',
         type: hmUI.data_type.HEART,
@@ -284,9 +284,9 @@ WatchFace({
     const calorieClick = hmUI.createWidget(
       hmUI.widget.IMG_CLICK,
       {
-        x: 15,
+        x: 10,
         y: calorieY,
-        w: 360,
+        w: 370,
         h: 36,
         src: 'tap_transparent.png',
         type: hmUI.data_type.CAL,
@@ -296,9 +296,9 @@ WatchFace({
     const batteryClick = hmUI.createWidget(
       hmUI.widget.IMG_CLICK,
       {
-        x: 15,
+        x: 10,
         y: batteryY,
-        w: 360,
+        w: 370,
         h: 36,
         src: 'tap_transparent.png',
         type: hmUI.data_type.BATTERY,
@@ -353,8 +353,9 @@ WatchFace({
       const digitWidth = 28
       const gap = 2
 
-      const valueAreaX = 115
-      const valueAreaW = 255
+      // ラベル画像を避けた数値表示領域
+      const valueAreaX = 165
+      const valueAreaW = 205
 
       const visibleCount =
         Math.min(text.length, maxDigits)
@@ -394,7 +395,7 @@ WatchFace({
 
 
     // ========================================
-    // 歩数更新
+    // 更新関数
     // ========================================
 
     function updateStep() {
@@ -407,10 +408,6 @@ WatchFace({
       )
     }
 
-
-    // ========================================
-    // 心拍更新
-    // ========================================
 
     function updateHeart() {
       if (!detailVisible) {
@@ -466,10 +463,6 @@ WatchFace({
     }
 
 
-    // ========================================
-    // カロリー更新
-    // ========================================
-
     function updateCalorie() {
       updateDigitRow(
         calorieDigitWidgets,
@@ -480,10 +473,6 @@ WatchFace({
       )
     }
 
-
-    // ========================================
-    // バッテリー更新
-    // ========================================
 
     function updateBattery() {
       updateDigitRow(
@@ -534,7 +523,6 @@ WatchFace({
       }
 
       // タップ領域
-      // setEnable() は使わない
       for (
         let i = 0;
         i < detailClicks.length;
@@ -546,7 +534,7 @@ WatchFace({
         )
       }
 
-      // 数値
+      // 数字
       updateStep()
       updateHeart()
       updateCalorie()
@@ -579,7 +567,7 @@ WatchFace({
       click_func: () => {
         const nextState = !detailVisible
 
-        // ホーム画面
+        // ホーム
         timeWidget.setProperty(
           hmUI.prop.VISIBLE,
           !nextState
@@ -589,7 +577,7 @@ WatchFace({
           !nextState
         )
 
-        // 詳細画面
+        // 詳細
         setDetailVisible(
           nextState
         )
